@@ -1,0 +1,110 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkinCancer Client</title>
+  <link rel="stylesheet" href="./style.css" />
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+  <div id="app">
+    <div id="errorBanner" class="errorBanner hidden"></div>
+
+    <section id="loginView" class="view card">
+      <h1>SkinCancer Checker</h1>
+      <p>Login with Google to continue.</p>
+      <button id="googleLoginBtn">Login with Google</button>
+      <div id="googleBtnContainer" class="hidden"></div>
+    </section>
+
+    <section id="profileView" class="view card hidden">
+      <h2>Complete Your Profile</h2>
+      <form id="profileForm">
+        <label>Full name</label>
+        <input id="fullName" required />
+
+        <label>Gender</label>
+        <select id="gender" required>
+          <option value="">Select...</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
+        </select>
+
+        <label>Age</label>
+        <input id="age" type="number" min="0" max="120" required />
+
+        <button type="submit">Save Profile</button>
+      </form>
+    </section>
+
+    <section id="mainView" class="view hidden">
+      <header class="topbar card">
+        <div>
+          <h2>SkinCancer Dashboard</h2>
+          <p id="meInfo"></p>
+        </div>
+        <button id="logoutBtn" class="danger">Logout</button>
+      </header>
+
+      <div class="layout">
+        <aside class="card sidebar">
+          <div class="row between">
+            <h3>History</h3>
+            <button id="refreshHistoryBtn">Refresh</button>
+          </div>
+          <ul id="historyList"></ul>
+        </aside>
+
+        <main class="card content">
+          <h3>Upload & Predict</h3>
+          <form id="predictForm">
+            <label>Select images</label>
+            <input id="filesInput" type="file" accept="image/*" multiple required />
+
+            <div class="row">
+              <div>
+                <label>Top K</label>
+                <input id="topK" type="number" min="1" max="10" value="3" />
+              </div>
+              <div>
+                <label>Client App</label>
+                <input id="clientApp" value="web" />
+              </div>
+            </div>
+
+            <button type="submit">Check</button>
+          </form>
+
+          <section class="resultBox">
+            <h4>Latest Result</h4>
+            <pre id="latestResult">No result yet.</pre>
+          </section>
+
+          <section class="feedbackBox">
+            <h4>Feedback</h4>
+            <form id="feedbackForm">
+              <input id="predictionId" placeholder="Prediction ID" readonly />
+              <select id="isCorrect">
+                <option value="">Unknown</option>
+                <option value="true">Correct</option>
+                <option value="false">Incorrect</option>
+              </select>
+              <input id="userLabel" placeholder="User label (optional)" />
+              <input id="comment" placeholder="Comment (optional)" />
+              <label class="row small">
+                <input id="allowForRetrain" type="checkbox" /> Allow for retrain
+              </label>
+              <button type="submit">Send Feedback</button>
+            </form>
+          </section>
+        </main>
+      </div>
+    </section>
+  </div>
+
+  <script src="./config.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

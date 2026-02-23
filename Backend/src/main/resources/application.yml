@@ -1,0 +1,33 @@
+﻿spring:
+  datasource:
+    url: jdbc:sqlserver://localhost:1433;databaseName=SkinCancer;encrypt=false;trustServerCertificate=true
+    username: sa
+    password: 1111
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 100MB
+
+server:
+  port: 8000
+
+app:
+  jwt:
+    secret: change-this-secret-min-32-chars-please-change
+    expiration-minutes: 10080
+  fastapi:
+    base-url: http://localhost:8000
+    default-top-k: 3
+  upload:
+    root-dir: D:/SkinCancer/uploads
