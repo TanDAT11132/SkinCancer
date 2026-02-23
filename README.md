@@ -8,7 +8,7 @@ https://drive.google.com/file/d/1bf-QJ7b1p-vbnM5X_oALFXvML2DPu-HR/view?usp=shari
 - **Backbone**: `EfficientNet-B3` pretrained ImageNet (Transfer Learning).
 - **Train 2 giai đoạn**:
   1. **Freeze backbone** và train classifier (head) vài epoch để “khớp” nhanh với bài toán 7 lớp.
-  2. **Unfreeze toàn bộ** và fine-tune với learning rate nhỏ hơn cho backbone để tránh “quên kiến thức pretrained”.
+  2. **Unfreeze toàn bộ** và fine-tune với learning rate nhỏ hơn cho backbone.
 - **Tối ưu cho imbalance**:
   - `WeightedRandomSampler` để cân bằng tần suất xuất hiện lớp trong batch.
   - `Focal Loss` để tập trung vào mẫu khó / lớp hiếm.
