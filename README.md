@@ -2,6 +2,7 @@
 Project phân loại ung thư da, bộ **HAM10000** với 7 lớp:
 `akiec, bcc, bkl, df, mel, nv, vasc`.
 Mục tiêu chính: đạt hiệu quả tốt trong bối cảnh **mất cân bằng lớp mạnh** (đặc biệt lớp `nv` rất nhiều) và giảm overfitting trên dataset y tế tương đối nhỏ.
+https://drive.google.com/file/d/1bf-QJ7b1p-vbnM5X_oALFXvML2DPu-HR/view?usp=sharing
 ## 1)  Pipeline
 - **Data**: chuẩn `torchvision.datasets.ImageFolder` theo 3 tập `train/val/test`.
 - **Backbone**: `EfficientNet-B3` pretrained ImageNet (Transfer Learning).
