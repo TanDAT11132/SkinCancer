@@ -2,7 +2,7 @@
 Project phân loại ung thư da, bộ **HAM10000** với 7 lớp:
 `akiec, bcc, bkl, df, mel, nv, vasc`.
 Mục tiêu chính: đạt hiệu quả tốt trong bối cảnh **mất cân bằng lớp mạnh** (đặc biệt lớp `nv` rất nhiều) và giảm overfitting trên dataset y tế tương đối nhỏ.
-## 1) Tổng quan Pipeline
+## 1)  Pipeline
 - **Data**: chuẩn `torchvision.datasets.ImageFolder` theo 3 tập `train/val/test`.
 - **Backbone**: `EfficientNet-B3` pretrained ImageNet (Transfer Learning).
 - **Train 2 giai đoạn**:
@@ -58,3 +58,30 @@ Các biến chính (mặc định trong code):
 - `IMAGE_SIZE` (default: `300`)
 - `DEVICE` (default: `cpu`) *(nếu có CUDA thì vẫn ưu tiên GPU khi `torch.cuda.is_available()` true)*
 - `MAX_BATCH_SIZE` (default: `32`)
+### backend
+- Cung cấp **REST API** cho đăng nhập Google, quản lý user, lưu lịch sử dự đoán
+- Nhận ảnh từ client, **lưu file + lưu DB**, sau đó **gọi FastAPI ModelService** để lấy kết quả dự đoán
+
+## 1) Kiến trúc & luồng xử lý
+
+### Thành phần
+- **Frontend (static)**: `index.html`, `app.js`, `style.css`, `config.js`  
+  → được Spring Boot serve trực tiếp.
+- **Backend (Spring Boot)**: API + Security (JWT) + Database (SQL Server) + Upload storage
+- **ModelService (FastAPI)**: endpoint dự đoán ảnh (ví dụ `/v1/predict`)
+
+### Luồng
+1. Client đăng nhập Google → lấy `id_token`
+2. Client gọi `POST /api/auth/google` → Backend verify token với Google (`tokeninfo`)
+3. Backend tạo **JWT** và trả về `accessToken`
+4. Client upload ảnh:
+   - Có auth: `POST /api/predictions/check`
+   - Không auth (demo): `POST /api/predictions/quick-check`
+5. Backend:
+   - Lưu file vào ổ đĩa (theo ngày `YYYY/MM/DD/uuid.ext`)
+   - Lưu metadata vào DB (hash, size, uri…)
+   - Gọi FastAPI: `POST {FASTAPI_BASE_URL}/v1/predict?top_k=...` với form-data `files`
+   - Lưu prediction vào DB (predictedClass, probability, topKJson, rawResponseJson…)
+6. Client xem lịch sử: `GET /api/predictions/history`
+7. User gửi feedback: `POST /api/predictions/{predictionId}/feedback`
+8. Admin export mẫu retrain: `GET /api/predictions/retrain-samples`
