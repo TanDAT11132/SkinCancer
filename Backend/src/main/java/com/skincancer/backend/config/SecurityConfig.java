@@ -1,4 +1,4 @@
-﻿package com.skincancer.backend.config;
+package com.skincancer.backend.config;
 
 import com.skincancer.backend.security.ApiAccessDeniedHandler;
 import com.skincancer.backend.security.ApiAuthenticationEntryPoint;
@@ -35,6 +35,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/index.html", "/error", "/favicon.ico", "/*.css", "/*.js").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/google").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/predictions/quick-check").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .anyRequest().authenticated()
                 )

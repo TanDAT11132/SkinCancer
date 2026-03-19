@@ -1,4 +1,4 @@
-﻿package com.skincancer.backend.service;
+package com.skincancer.backend.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,6 +17,7 @@ import com.skincancer.backend.repository.PredictionRepository;
 import com.skincancer.backend.repository.UserRepository;
 import com.skincancer.backend.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpEntity;
@@ -48,6 +49,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class PredictionService {
 
@@ -60,7 +62,12 @@ public class PredictionService {
     private final ObjectMapper objectMapper;
 
     @Transactional
-    public PredictionBatchResponse predict(UserPrincipal principal, List<MultipartFile> files, Integer topK, String clientApp, String clientIp) {
+    public PredictionBatchResponse predict(UserPrincipal principal, List<MultipartFile> files, String clientIp) {
+        log.info("[FLOW][PREDICT] Start authenticated predict userId={} files={} clientIp={}",
+                principal.userId(),
+                files == null ? 0 : files.size(),
+                clientIp
+        );
         if (files == null || files.isEmpty()) {
             throw new BadRequestException("FILES_REQUIRED", "files is required");
         }
@@ -70,7 +77,7 @@ public class PredictionService {
 
         List<ImageUpload> uploads = saveUploads(user, files);
 
-        Object fastApiRaw = callFastApi(files, topK);
+        Object fastApiRaw = callFastApi(files, null);
         List<Map<String, Object>> predictions = normalizeFastApiResponse(fastApiRaw, uploads.size());
 
         List<PredictionItemResponse> resultItems = new ArrayList<>();
@@ -81,11 +88,12 @@ public class PredictionService {
             Prediction prediction = new Prediction();
             prediction.setImage(upload);
             prediction.setRequestedAt(LocalDateTime.now());
-            prediction.setClientApp(clientApp);
+            prediction.setClientApp(null);
             prediction.setClientIp(clientIp);
             prediction.setModelName(asText(p.get("model_name")));
             prediction.setModelVersion(asText(p.get("model_version")));
             prediction.setPredictedClass(firstNonBlank(
+                    asText(p.get("predicted_label")),
                     asText(p.get("predicted_class")),
                     asText(p.get("label")),
                     "unknown"
@@ -98,16 +106,53 @@ public class PredictionService {
             resultItems.add(toResponse(prediction));
         }
 
+        log.info("[FLOW][PREDICT] Completed authenticated predict userId={} results={}", principal.userId(), resultItems.size());
+        return new PredictionBatchResponse(resultItems);
+    }
+
+    public PredictionBatchResponse quickPredict(List<MultipartFile> files) {
+        log.info("[FLOW][PREDICT] Start quick predict files={}", files == null ? 0 : files.size());
+        if (files == null || files.isEmpty()) {
+            throw new BadRequestException("FILES_REQUIRED", "files is required");
+        }
+
+        Object fastApiRaw = callFastApi(files, null);
+        List<Map<String, Object>> predictions = normalizeFastApiResponse(fastApiRaw, files.size());
+
+        List<PredictionItemResponse> resultItems = new ArrayList<>();
+        for (Map<String, Object> p : predictions) {
+            resultItems.add(new PredictionItemResponse(
+                    null,
+                    null,
+                    null,
+                    firstNonBlank(
+                            asText(p.get("predicted_label")),
+                            asText(p.get("predicted_class")),
+                            asText(p.get("label")),
+                            "unknown"
+                    ),
+                    extractProbability(p),
+                    writeJson(p.get("top_k")),
+                    writeJson(p),
+                    asText(p.get("model_name")),
+                    asText(p.get("model_version")),
+                    LocalDateTime.now()
+            ));
+        }
+
+        log.info("[FLOW][PREDICT] Completed quick predict results={}", resultItems.size());
         return new PredictionBatchResponse(resultItems);
     }
 
     @Transactional(readOnly = true)
     public List<PredictionItemResponse> history(UserPrincipal principal, int page, int size) {
-        return predictionRepository
+        List<PredictionItemResponse> results = predictionRepository
                 .findByImageUserUserIdOrderByRequestedAtDesc(principal.userId(), PageRequest.of(page, size))
                 .stream()
                 .map(this::toResponse)
                 .toList();
+        log.info("[FLOW][PREDICT] Load history userId={} page={} size={} returned={}", principal.userId(), page, size, results.size());
+        return results;
     }
 
     private List<ImageUpload> saveUploads(UserEntity user, List<MultipartFile> files) {
@@ -146,6 +191,7 @@ public class PredictionService {
     private Object callFastApi(List<MultipartFile> files, Integer topK) {
         int resolvedTopK = topK == null ? fastApiProperties.defaultTopK() : topK;
         String url = "%s/v1/predict?top_k=%d".formatted(fastApiProperties.baseUrl(), resolvedTopK);
+        log.info("[FLOW][PREDICT] Call FastAPI url={} files={} topK={}", url, files.size(), resolvedTopK);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -167,8 +213,11 @@ public class PredictionService {
 
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
         try {
-            return restTemplate.postForObject(url, request, Object.class);
+            Object response = restTemplate.postForObject(url, request, Object.class);
+            log.info("[FLOW][PREDICT] FastAPI call success");
+            return response;
         } catch (RestClientException ex) {
+            log.error("[FLOW][PREDICT] FastAPI call failed: {}", ex.getMessage());
             throw new ExternalServiceException("FASTAPI_CALL_FAILED", "Cannot call prediction service");
         }
     }
@@ -263,6 +312,9 @@ public class PredictionService {
         Object prob = p.get("probability");
         if (prob == null) {
             prob = p.get("score");
+        }
+        if (prob == null) {
+            prob = p.get("confidence");
         }
 
         if (prob instanceof Number n) {

@@ -1,6 +1,7 @@
 from io import BytesIO
 from typing import List, Tuple
 
+import numpy as np
 import torch
 import torch.nn as nn
 from PIL import Image
@@ -11,6 +12,8 @@ from app.config import settings
 
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_STD = (0.229, 0.224, 0.225)
+NON_SKIN_LABEL = "NON_SKIN_IMAGE"
+NON_SKIN_REASON = "Input image does not appear to be skin."
 
 
 class ModelService:
@@ -49,6 +52,37 @@ class ModelService:
         image = Image.open(BytesIO(image_bytes)).convert("RGB")
         return self.transform(image)
 
+    def _load_rgb(self, image_bytes: bytes) -> Image.Image:
+        return Image.open(BytesIO(image_bytes)).convert("RGB")
+
+    def _skin_pixel_ratio(self, image: Image.Image) -> float:
+        rgb = np.asarray(image, dtype=np.uint8)
+        r = rgb[:, :, 0].astype(np.int16)
+        g = rgb[:, :, 1].astype(np.int16)
+        b = rgb[:, :, 2].astype(np.int16)
+
+        # RGB rule of thumb for skin-like tones under varied lighting.
+        rgb_mask = (
+            (r > 95)
+            & (g > 40)
+            & (b > 20)
+            & ((np.maximum(np.maximum(r, g), b) - np.minimum(np.minimum(r, g), b)) > 15)
+            & (np.abs(r - g) > 15)
+            & (r > g)
+            & (r > b)
+        )
+
+        ycbcr = np.asarray(image.convert("YCbCr"), dtype=np.uint8)
+        cb = ycbcr[:, :, 1].astype(np.int16)
+        cr = ycbcr[:, :, 2].astype(np.int16)
+        ycbcr_mask = (cb >= 77) & (cb <= 127) & (cr >= 133) & (cr <= 173)
+
+        mask = rgb_mask & ycbcr_mask
+        return float(mask.mean())
+
+    def _is_skin_like_image(self, image: Image.Image) -> bool:
+        return self._skin_pixel_ratio(image) >= settings.min_skin_ratio
+
     @torch.inference_mode()
     def predict_batch(
         self, image_items: List[Tuple[str, bytes]], top_k: int = 1
@@ -56,17 +90,37 @@ class ModelService:
         if len(image_items) > settings.max_batch_size:
             raise ValueError(f"Too many images. max_batch_size={settings.max_batch_size}")
 
-        tensors = [self.preprocess(content) for _, content in image_items]
-        batch = torch.stack(tensors).to(self.device)
+        k = max(1, min(top_k, len(self.class_names)))
+        results = [{} for _ in image_items]
 
+        valid_positions = []
+        valid_tensors = []
+        for idx, (filename, content) in enumerate(image_items):
+            image = self._load_rgb(content)
+            if not self._is_skin_like_image(image):
+                results[idx] = {
+                    "filename": filename,
+                    "predicted_index": -1,
+                    "predicted_label": NON_SKIN_LABEL,
+                    "confidence": 0.0,
+                    "topk": [],
+                    "is_valid_skin_image": False,
+                    "rejection_reason": NON_SKIN_REASON,
+                }
+                continue
+            valid_positions.append(idx)
+            valid_tensors.append(self.transform(image))
+
+        if not valid_tensors:
+            return results
+
+        batch = torch.stack(valid_tensors).to(self.device)
         logits = self.model(batch)
         probs = torch.softmax(logits, dim=1)
-        k = max(1, min(top_k, len(self.class_names)))
         confs, indices = torch.topk(probs, k=k, dim=1)
 
-        results = []
-        for row in range(len(image_items)):
-            filename = image_items[row][0]
+        for row, original_pos in enumerate(valid_positions):
+            filename = image_items[original_pos][0]
             topk_items = []
             for col in range(k):
                 idx = int(indices[row, col].item())
@@ -78,13 +132,13 @@ class ModelService:
                     }
                 )
 
-            results.append(
-                {
-                    "filename": filename,
-                    "predicted_index": topk_items[0]["index"],
-                    "predicted_label": topk_items[0]["label"],
-                    "confidence": topk_items[0]["confidence"],
-                    "topk": topk_items,
-                }
-            )
+            results[original_pos] = {
+                "filename": filename,
+                "predicted_index": topk_items[0]["index"],
+                "predicted_label": topk_items[0]["label"],
+                "confidence": topk_items[0]["confidence"],
+                "topk": topk_items,
+                "is_valid_skin_image": True,
+                "rejection_reason": None,
+            }
         return results

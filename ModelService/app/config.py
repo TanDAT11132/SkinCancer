@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     image_size: int = 300
     device: str = "cpu"
     max_batch_size: int = 32
+    min_skin_ratio: float = 0.15
 
 
 settings = Settings()

@@ -1,4 +1,4 @@
-﻿package com.skincancer.backend.dto.response;
+package com.skincancer.backend.dto.response;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

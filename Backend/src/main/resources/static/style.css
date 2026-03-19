@@ -51,9 +51,21 @@ button {
   border: none;
   cursor: pointer;
 }
+button.secondary {
+  width: auto;
+  background: #dcefe8;
+  color: var(--text);
+}
+button.secondary.active {
+  background: var(--text);
+  color: #fff;
+}
 button.danger { background: var(--danger); width: auto; }
 .topbar { display: flex; justify-content: space-between; align-items: center; }
 .topbar p { margin: 0; color: var(--muted); }
+.topbarActions { display: flex; gap: 12px; align-items: center; }
+.tabNav { display: flex; gap: 8px; }
+.page { margin-top: 16px; }
 .layout { display: grid; grid-template-columns: 300px 1fr; gap: 16px; margin-top: 16px; }
 .sidebar { max-height: 78vh; overflow: auto; }
 #historyList { list-style: none; padding: 0; margin: 0; }
@@ -75,9 +87,184 @@ pre {
   overflow: auto;
   min-height: 120px;
 }
+.adminLayout {
+  display: grid;
+  gap: 16px;
+}
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+.statCard span,
+.statCard small { color: var(--muted); }
+.statCard strong {
+  display: block;
+  margin: 10px 0 6px;
+  font-size: 32px;
+}
+.adminCharts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.adminSection h3 { margin-top: 0; }
+.barChart {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16px, 1fr));
+  gap: 8px;
+  align-items: end;
+  min-height: 250px;
+  margin-top: 16px;
+}
+.barItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.barTrack {
+  height: 180px;
+  width: 100%;
+  display: flex;
+  align-items: end;
+}
+.barFill {
+  width: 100%;
+  border-radius: 999px 999px 6px 6px;
+  background: linear-gradient(180deg, #14b8a6 0%, #0f766e 100%);
+}
+.barLabel,
+.barValue,
+.emptyState {
+  font-size: 12px;
+  color: var(--muted);
+}
+.metricList {
+  display: grid;
+  gap: 12px;
+}
+.metricList.large {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.adminReviewGrid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 16px;
+}
+.adminHistoryGrid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 16px;
+}
+.filterRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.adminUserList,
+.adminPredictionList {
+  display: grid;
+  gap: 10px;
+  max-height: 480px;
+  overflow: auto;
+}
+.listCard {
+  width: 100%;
+  text-align: left;
+  background: #f7fbfd;
+  color: var(--text);
+  border: 1px solid var(--line);
+  display: grid;
+  gap: 4px;
+}
+.listCard.active {
+  border-color: var(--brand);
+  background: #e7f7f3;
+}
+.adminPredictionDetail {
+  display: grid;
+  gap: 16px;
+}
+.predictionPreviewImage {
+  width: 100%;
+  max-height: 360px;
+  object-fit: contain;
+  border-radius: 12px;
+  background: #0f172a;
+}
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.detailGrid div {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fbfdff;
+}
+.adminStatDetails {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.detailCard {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fbfdff;
+}
+.detailCard span {
+  color: var(--muted);
+}
+.switchRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 0;
+}
+.switchRow input {
+  width: auto;
+}
+.metricRow {
+  display: grid;
+  grid-template-columns: 110px 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+.metricBarWrap {
+  height: 10px;
+  background: #ebf1f5;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.metricBar {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #38bdf8 0%, #0f766e 100%);
+}
 
 @media (max-width: 900px) {
   .layout { grid-template-columns: 1fr; }
   .sidebar { order: 2; }
   .content { order: 1; }
+  .statsGrid,
+  .adminCharts,
+  .metricList.large,
+  .adminReviewGrid,
+  .adminHistoryGrid,
+  .detailGrid,
+  .adminStatDetails,
+  .filterRow { grid-template-columns: 1fr; }
+  .topbar,
+  .topbarActions { align-items: stretch; flex-direction: column; }
+  .tabNav { width: 100%; }
+  button.danger,
+  button.secondary { width: 100%; }
 }

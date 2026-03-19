@@ -1,4 +1,4 @@
-﻿package com.skincancer.backend.service;
+package com.skincancer.backend.service;
 
 import com.skincancer.backend.dto.request.CreateFeedbackRequest;
 import com.skincancer.backend.dto.response.FeedbackResponse;
@@ -12,6 +12,7 @@ import com.skincancer.backend.repository.PredictionRepository;
 import com.skincancer.backend.repository.UserRepository;
 import com.skincancer.backend.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class FeedbackService {
 
@@ -30,6 +32,7 @@ public class FeedbackService {
 
     @Transactional
     public FeedbackResponse create(UserPrincipal principal, UUID predictionId, CreateFeedbackRequest request) {
+        log.info("[FLOW][FEEDBACK] Create feedback userId={} predictionId={}", principal.userId(), predictionId);
         Prediction prediction = predictionRepository.findById(predictionId)
                 .orElseThrow(() -> new NotFoundException("PREDICTION_NOT_FOUND", "Prediction not found"));
         UserEntity user = userRepository.findById(principal.userId())
@@ -43,14 +46,24 @@ public class FeedbackService {
         feedback.setComment(request.comment());
         feedback.setAllowForRetrain(Boolean.TRUE.equals(request.allowForRetrain()));
         feedback.setCreatedAt(LocalDateTime.now());
-        feedbackRepository.save(feedback);
+        feedback = feedbackRepository.save(feedback);
+        log.info("[FLOW][FEEDBACK] Create feedback success feedbackId={} allowForRetrain={}", feedback.getFeedbackId(), feedback.isAllowForRetrain());
 
-        return new FeedbackResponse("Feedback saved");
+        return new FeedbackResponse(
+                feedback.getFeedbackId(),
+                prediction.getPredictionId(),
+                user.getUserId(),
+                feedback.getIsCorrect(),
+                feedback.getUserLabel(),
+                feedback.getComment(),
+                feedback.isAllowForRetrain(),
+                feedback.getCreatedAt()
+        );
     }
 
     @Transactional(readOnly = true)
     public List<RetrainSampleResponse> retrainSamples(int page, int size) {
-        return feedbackRepository.findByAllowForRetrainTrueOrderByCreatedAtDesc(PageRequest.of(page, size))
+        List<RetrainSampleResponse> results = feedbackRepository.findByAllowForRetrainTrueOrderByCreatedAtDesc(PageRequest.of(page, size))
                 .stream()
                 .map(f -> new RetrainSampleResponse(
                         f.getFeedbackId(),
@@ -63,5 +76,7 @@ public class FeedbackService {
                         f.getCreatedAt()
                 ))
                 .toList();
+        log.info("[FLOW][FEEDBACK] Load retrain samples page={} size={} returned={}", page, size, results.size());
+        return results;
     }
 }

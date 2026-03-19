@@ -1,4 +1,4 @@
-﻿package com.skincancer.backend.controller;
+package com.skincancer.backend.controller;
 
 import com.skincancer.backend.dto.request.CreateFeedbackRequest;
 import com.skincancer.backend.dto.response.FeedbackResponse;
@@ -7,8 +7,10 @@ import com.skincancer.backend.security.UserPrincipal;
 import com.skincancer.backend.service.FeedbackService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,13 +29,19 @@ public class FeedbackController {
 
     private final FeedbackService feedbackService;
 
-    @PostMapping("/{predictionId}/feedback")
-    public FeedbackResponse create(
+    @PostMapping({"/{predictionId}/feedbacks", "/{predictionId}/feedback"})
+    public ResponseEntity<FeedbackResponse> create(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable UUID predictionId,
             @Valid @RequestBody CreateFeedbackRequest request
     ) {
-        return feedbackService.create(principal, predictionId, request);
+        FeedbackResponse response = feedbackService.create(principal, predictionId, request);
+        String location = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/api/predictions/{predictionId}/feedbacks/{feedbackId}")
+                .buildAndExpand(predictionId, response.feedbackId())
+                .toUriString();
+
+        return ResponseEntity.created(java.net.URI.create(location)).body(response);
     }
 
     @PreAuthorize("hasRole('ADMIN')")

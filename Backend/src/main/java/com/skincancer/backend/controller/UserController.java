@@ -1,4 +1,4 @@
-﻿package com.skincancer.backend.controller;
+package com.skincancer.backend.controller;
 
 import com.skincancer.backend.dto.request.UpdateProfileRequest;
 import com.skincancer.backend.dto.response.UserProfileResponse;

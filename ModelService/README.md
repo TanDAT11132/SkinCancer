@@ -65,6 +65,7 @@ http://localhost:8000/docs
 - `IMAGE_SIZE` (default: `300`)
 - `DEVICE` (default: `cpu`)
 - `MAX_BATCH_SIZE` (default: `32`)
+- `MIN_SKIN_RATIO` (default: `0.15`) - minimum skin-like pixel ratio to accept image for disease inference
 
 ## 6) API contract (inference only)
 
@@ -77,6 +78,7 @@ Returns model/service status.
 - Content-Type: `multipart/form-data`
 - Required field: `files` (repeat for multiple images)
 - No user profile fields, no storage side effects.
+- If an uploaded image is detected as non-skin, service returns `predicted_label=NON_SKIN_IMAGE` and does not run disease classification for that file.
 
 Example:
 

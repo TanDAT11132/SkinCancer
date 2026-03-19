@@ -1,4 +1,4 @@
-﻿package com.skincancer.backend.security;
+package com.skincancer.backend.security;
 
 import com.skincancer.backend.entity.Role;
 

@@ -1,4 +1,4 @@
-﻿package com.skincancer.backend.security;
+package com.skincancer.backend.security;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

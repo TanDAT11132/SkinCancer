@@ -1,4 +1,4 @@
-﻿package com.skincancer.backend.repository;
+package com.skincancer.backend.repository;
 
 import com.skincancer.backend.entity.ImageUpload;
 import org.springframework.data.domain.Page;

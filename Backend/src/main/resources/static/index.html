@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SkinCancer Client</title>
-  <link rel="stylesheet" href="./style.css" />
+  <link rel="stylesheet" href="./style.css?v=20260317c" />
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
@@ -14,8 +14,7 @@
     <section id="loginView" class="view card">
       <h1>SkinCancer Checker</h1>
       <p>Login with Google to continue.</p>
-      <button id="googleLoginBtn">Login with Google</button>
-      <div id="googleBtnContainer" class="hidden"></div>
+      <div id="googleBtnContainer"></div>
     </section>
 
     <section id="profileView" class="view card hidden">
@@ -45,66 +44,153 @@
           <h2>SkinCancer Dashboard</h2>
           <p id="meInfo"></p>
         </div>
-        <button id="logoutBtn" class="danger">Logout</button>
+        <div class="topbarActions">
+          <nav id="mainNav" class="tabNav hidden">
+            <button id="userPageBtn" type="button" class="secondary active">User</button>
+            <button id="adminPageBtn" type="button" class="secondary">Admin</button>
+          </nav>
+          <button id="logoutBtn" class="danger">Logout</button>
+        </div>
       </header>
 
-      <div class="layout">
-        <aside class="card sidebar">
-          <div class="row between">
-            <h3>History</h3>
-            <button id="refreshHistoryBtn">Refresh</button>
-          </div>
-          <ul id="historyList"></ul>
-        </aside>
-
-        <main class="card content">
-          <h3>Upload & Predict</h3>
-          <form id="predictForm">
-            <label>Select images</label>
-            <input id="filesInput" type="file" accept="image/*" multiple required />
-
-            <div class="row">
-              <div>
-                <label>Top K</label>
-                <input id="topK" type="number" min="1" max="10" value="3" />
-              </div>
-              <div>
-                <label>Client App</label>
-                <input id="clientApp" value="web" />
-              </div>
+      <section id="userPage" class="page">
+        <div class="layout">
+          <aside id="historyPanel" class="card sidebar">
+            <div class="row between">
+              <h3>History</h3>
+              <button id="refreshHistoryBtn">Refresh</button>
             </div>
+            <ul id="historyList"></ul>
+          </aside>
 
-            <button type="submit">Check</button>
-          </form>
+          <main class="card content">
+            <h3>Upload & Predict</h3>
+            <form id="predictForm">
+              <label>Select images</label>
+              <input id="filesInput" type="file" accept="image/*" multiple required />
 
-          <section class="resultBox">
-            <h4>Latest Result</h4>
-            <pre id="latestResult">No result yet.</pre>
-          </section>
-
-          <section class="feedbackBox">
-            <h4>Feedback</h4>
-            <form id="feedbackForm">
-              <input id="predictionId" placeholder="Prediction ID" readonly />
-              <select id="isCorrect">
-                <option value="">Unknown</option>
-                <option value="true">Correct</option>
-                <option value="false">Incorrect</option>
-              </select>
-              <input id="userLabel" placeholder="User label (optional)" />
-              <input id="comment" placeholder="Comment (optional)" />
-              <label class="row small">
-                <input id="allowForRetrain" type="checkbox" /> Allow for retrain
-              </label>
-              <button type="submit">Send Feedback</button>
+              <button type="submit">Check</button>
             </form>
+
+            <section class="resultBox">
+              <h4>Latest Result</h4>
+              <pre id="latestResult">No result yet.</pre>
+            </section>
+
+            <section id="feedbackPanel" class="feedbackBox">
+              <h4>Feedback</h4>
+              <form id="feedbackForm">
+                <input id="predictionId" placeholder="Prediction ID" readonly />
+                <select id="isCorrect">
+                  <option value="">Unknown</option>
+                  <option value="true">Correct</option>
+                  <option value="false">Incorrect</option>
+                </select>
+                <input id="userLabel" placeholder="User label (optional)" />
+                <input id="comment" placeholder="Comment (optional)" />
+                <button type="submit">Send Feedback</button>
+              </form>
+            </section>
+          </main>
+        </div>
+      </section>
+
+      <section id="adminPage" class="page hidden">
+        <div class="adminLayout">
+          <section class="statsGrid">
+            <article class="card statCard">
+              <span>Total Users</span>
+              <strong id="statTotalUsers">0</strong>
+              <small id="statNewUsersMonth">0 new this month</small>
+            </article>
+            <article class="card statCard">
+              <span>Total Predictions</span>
+              <strong id="statTotalPredictions">0</strong>
+              <small id="statPredictionsMonth">0 this month</small>
+            </article>
+            <article class="card statCard">
+              <span>Total Feedbacks</span>
+              <strong id="statTotalFeedbacks">0</strong>
+              <small id="statFeedbackAccuracy">0% accuracy</small>
+            </article>
+            <article class="card statCard">
+              <span>Retrain Ready</span>
+              <strong id="statRetrainReady">0</strong>
+              <small id="statAnsweredFeedbacks">0 answered feedbacks</small>
+            </article>
           </section>
-        </main>
-      </div>
+
+          <section class="card adminSection">
+            <div class="row between">
+              <h3>Users In Current Month</h3>
+              <button id="refreshAdminBtn" type="button">Refresh Admin Data</button>
+            </div>
+            <div id="monthlyUsersChart" class="barChart"></div>
+          </section>
+
+          <div class="adminCharts">
+            <section class="card adminSection">
+              <h3>Gender Distribution</h3>
+              <div id="genderBreakdown" class="metricList"></div>
+            </section>
+
+            <section class="card adminSection">
+              <h3>Diagnosis Results</h3>
+              <div id="diagnosisBreakdown" class="metricList"></div>
+            </section>
+          </div>
+
+          <section class="card adminSection">
+            <h3>Feedback Effectiveness</h3>
+            <div id="feedbackBreakdown" class="metricList large"></div>
+          </section>
+
+          <section class="card adminSection">
+            <h3>Statistic Details</h3>
+            <div id="adminStatDetails" class="adminStatDetails"></div>
+          </section>
+
+          <section class="adminReviewGrid">
+            <aside class="card adminSection">
+              <div class="row between">
+                <h3>Users</h3>
+                <button id="refreshAdminUsersBtn" type="button">Refresh Users</button>
+              </div>
+              <div id="adminUsersList" class="adminUserList"></div>
+            </aside>
+
+            <section class="card adminSection">
+              <div class="row between">
+                <h3>User History</h3>
+                <p id="adminSelectedUserLabel" class="small">Select a user to view predictions</p>
+              </div>
+              <div class="filterRow">
+                <select id="adminCorrectFilter">
+                  <option value="all">All feedback</option>
+                  <option value="true">Correct</option>
+                  <option value="false">Incorrect</option>
+                  <option value="unknown">Unknown</option>
+                </select>
+                <select id="adminRetrainFilter">
+                  <option value="all">All retrain states</option>
+                  <option value="true">Allow retrain</option>
+                  <option value="false">Not allow retrain</option>
+                </select>
+              </div>
+              <div class="adminHistoryGrid">
+                <div id="adminPredictionList" class="adminPredictionList"></div>
+                <div id="adminPredictionDetail" class="adminPredictionDetail emptyState">
+                  Select a prediction to preview image and result.
+                </div>
+              </div>
+            </section>
+          </section>
+        </div>
+      </section>
     </section>
   </div>
 
-  <script src="./config.js"></script>
-  <script src="./app.js"></script>
+  <script src="./config.js?v=20260317c"></script>
+  <script src="./app.js?v=20260317c"></script>
 </body>
 </html>

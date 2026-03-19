@@ -1,4 +1,4 @@
-﻿package com.skincancer.backend.config;
+package com.skincancer.backend.config;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
-@EnableConfigurationProperties({JwtProperties.class, FastApiProperties.class, UploadProperties.class})
+@EnableConfigurationProperties({JwtProperties.class, FastApiProperties.class, UploadProperties.class, AdminProperties.class})
 public class AppConfig {
     @Bean
     public RestTemplate restTemplate() {

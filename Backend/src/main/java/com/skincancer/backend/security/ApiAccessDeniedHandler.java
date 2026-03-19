@@ -1,4 +1,4 @@
-﻿package com.skincancer.backend.security;
+package com.skincancer.backend.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skincancer.backend.exception.ApiErrorResponse;

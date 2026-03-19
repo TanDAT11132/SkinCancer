@@ -1,4 +1,4 @@
-﻿package com.skincancer.backend.repository;
+package com.skincancer.backend.repository;
 
 import com.skincancer.backend.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

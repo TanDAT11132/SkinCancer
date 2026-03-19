@@ -1,4 +1,4 @@
-﻿package com.skincancer.backend.entity;
+package com.skincancer.backend.entity;
 
 public enum Role {
     USER,

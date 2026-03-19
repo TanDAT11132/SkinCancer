@@ -1,4 +1,4 @@
-﻿spring:
+spring:
   datasource:
     url: jdbc:sqlserver://localhost:1433;databaseName=SkinCancer;encrypt=false;trustServerCertificate=true
     username: sa
@@ -20,14 +20,17 @@
       max-request-size: 100MB
 
 server:
-  port: 8000
+  port: 8001
 
 app:
   jwt:
     secret: change-this-secret-min-32-chars-please-change
     expiration-minutes: 10080
   fastapi:
-    base-url: http://localhost:8000
+    base-url: http://localhost:8002
     default-top-k: 3
+  admin:
+    emails:
+      - admin@example.com
   upload:
     root-dir: D:/SkinCancer/uploads

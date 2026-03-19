@@ -6,9 +6,9 @@
 mvn spring-boot:run
 ```
 
-- Backend port: `5000`
-- UI URL: `http://localhost:5000/index.html`
-- API base (same origin): `http://localhost:5000`
+- Backend port: `8001`
+- UI URL: `http://localhost:8001/index.html`
+- API base (same origin): `http://localhost:8001`
 
 ## Upload storage
 
@@ -19,12 +19,14 @@ mvn spring-boot:run
 ## Frontend + Backend gop chung
 
 Frontend da duoc copy vao `src/main/resources/static`:
+
 - `src/main/resources/static/index.html`
 - `src/main/resources/static/app.js`
 - `src/main/resources/static/style.css`
 - `src/main/resources/static/config.js`
 
 Trong `config.js`:
+
 - `API_BASE_URL` dang de `""` de goi cung domain/port voi backend.
 - `GOOGLE_CLIENT_ID` can set gia tri that.
 
@@ -36,23 +38,14 @@ Da them task: `.vscode/tasks.json`
 - `Run FastAPI`
 - `Run BE + FastAPI` (parallel)
 
-Trong VS Code:
-1. `Terminal` -> `Run Task...`
-2. Chon `Run BE + FastAPI`
-
-Luu y:
-- Task `Run FastAPI` mac dinh chay trong `${workspaceFolder}` voi command:
-  - `uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload`
-- Neu FastAPI cua ban nam folder khac, sua `options.cwd` cua task `Run FastAPI`.
-
 ## APIs flow
 
 1. `POST /api/auth/google`
 2. `GET /api/me`
 3. `PUT /api/me/profile`
-4. `POST /api/predictions/check?top_k=3&client_app=web`
-5. `GET /api/predictions/history?page=0&size=20`
-6. `POST /api/predictions/{predictionId}/feedback`
+4. `POST /api/predictions` (alias cu: `POST /api/predictions/check`)
+5. `GET /api/predictions?page=0&size=20` (alias cu: `GET /api/predictions/history?page=0&size=20`)
+6. `POST /api/predictions/{predictionId}/feedbacks` (alias cu: `POST /api/predictions/{predictionId}/feedback`)
 7. `GET /api/predictions/retrain-samples?page=0&size=100` (ADMIN)
 
 ## Error format (Backend -> Frontend)

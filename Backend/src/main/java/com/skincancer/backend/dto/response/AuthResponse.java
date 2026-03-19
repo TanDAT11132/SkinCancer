@@ -1,4 +1,4 @@
-﻿package com.skincancer.backend.dto.response;
+package com.skincancer.backend.dto.response;
 
 import com.skincancer.backend.entity.Role;
 

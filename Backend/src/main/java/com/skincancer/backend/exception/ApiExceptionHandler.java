@@ -1,4 +1,4 @@
-﻿package com.skincancer.backend.exception;
+package com.skincancer.backend.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;

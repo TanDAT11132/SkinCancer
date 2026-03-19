@@ -1,4 +1,4 @@
-﻿package com.skincancer.backend.dto.request;
+package com.skincancer.backend.dto.request;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

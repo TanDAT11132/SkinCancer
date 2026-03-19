@@ -1,4 +1,4 @@
-﻿package com.skincancer.backend.entity;
+package com.skincancer.backend.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,7 +17,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "User", schema = "dbo")
+@Table(name = "`User`", schema = "dbo")
 public class UserEntity {
 
     @Id

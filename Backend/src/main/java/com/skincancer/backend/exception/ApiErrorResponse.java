@@ -1,4 +1,4 @@
-﻿package com.skincancer.backend.exception;
+package com.skincancer.backend.exception;
 
 import java.time.LocalDateTime;
 

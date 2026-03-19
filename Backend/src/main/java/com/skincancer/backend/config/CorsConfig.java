@@ -1,4 +1,4 @@
-﻿package com.skincancer.backend.config;
+package com.skincancer.backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

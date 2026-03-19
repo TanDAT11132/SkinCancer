@@ -1,4 +1,4 @@
-﻿package com.skincancer.backend.service;
+package com.skincancer.backend.service;
 
 import com.skincancer.backend.entity.UserEntity;
 import com.skincancer.backend.exception.ExternalServiceException;

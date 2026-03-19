@@ -1,4 +1,4 @@
-﻿package com.skincancer.backend.controller;
+package com.skincancer.backend.controller;
 
 import com.skincancer.backend.dto.response.PredictionBatchResponse;
 import com.skincancer.backend.dto.response.PredictionItemResponse;
@@ -24,18 +24,24 @@ public class PredictionController {
 
     private final PredictionService predictionService;
 
-    @PostMapping(value = "/check", consumes = "multipart/form-data")
-    public PredictionBatchResponse check(
+    @PostMapping(value = {"", "/check"}, consumes = "multipart/form-data")
+    public PredictionBatchResponse createPrediction(
             @AuthenticationPrincipal UserPrincipal principal,
             @RequestPart("files") List<MultipartFile> files,
-            @RequestParam(name = "top_k", required = false) Integer topK,
-            @RequestParam(name = "client_app", required = false) String clientApp,
             HttpServletRequest request
     ) {
-        return predictionService.predict(principal, files, topK, clientApp, request.getRemoteAddr());
+        return predictionService.predict(principal, files, request.getRemoteAddr());
     }
 
-    @GetMapping("/history")
+    @PostMapping(value = "/quick-check", consumes = "multipart/form-data")
+    public PredictionBatchResponse quickCheck(
+            @RequestPart("files") List<MultipartFile> files,
+            HttpServletRequest request
+    ) {
+        return predictionService.quickPredict(files);
+    }
+
+    @GetMapping({"", "/history"})
     public List<PredictionItemResponse> history(
             @AuthenticationPrincipal UserPrincipal principal,
             @RequestParam(defaultValue = "0") int page,
