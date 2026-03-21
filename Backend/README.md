@@ -23,12 +23,21 @@ Frontend da duoc copy vao `src/main/resources/static`:
 - `src/main/resources/static/index.html`
 - `src/main/resources/static/app.js`
 - `src/main/resources/static/style.css`
-- `src/main/resources/static/config.js`
+- `src/main/resources/static/config.js` (duoc backend override bang runtime config khi chay)
 
 Trong `config.js`:
 
-- `API_BASE_URL` dang de `""` de goi cung domain/port voi backend.
-- `GOOGLE_CLIENT_ID` can set gia tri that.
+- `API_BASE_URL` mac dinh de rong de frontend goi cung domain/port voi backend.
+- `GOOGLE_CLIENT_ID` doc tu env `APP_GOOGLE_CLIENT_ID`.
+
+## Deploy Render
+
+- Repo da co `render.yaml` o thu muc goc de tao `skincancer-backend`, `skincancer-model`, va `skincancer-db`.
+- Backend doc them cac env:
+  - `APP_GOOGLE_CLIENT_ID`
+  - `APP_FRONTEND_API_BASE_URL`
+  - `APP_CORS_ALLOWED_ORIGINS`
+- `APP_FASTAPI_BASE_URL` chap nhan ca URL day du va gia tri noi bo dang `host:port`.
 
 ## Chay 2 project trong VS Code
 

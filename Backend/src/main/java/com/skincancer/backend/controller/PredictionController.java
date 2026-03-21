@@ -28,17 +28,19 @@ public class PredictionController {
     public PredictionBatchResponse createPrediction(
             @AuthenticationPrincipal UserPrincipal principal,
             @RequestPart("files") List<MultipartFile> files,
+            @RequestParam(required = false) Integer topK,
             HttpServletRequest request
     ) {
-        return predictionService.predict(principal, files, request.getRemoteAddr());
+        return predictionService.predict(principal, files, request.getRemoteAddr(), topK);
     }
 
     @PostMapping(value = "/quick-check", consumes = "multipart/form-data")
     public PredictionBatchResponse quickCheck(
             @RequestPart("files") List<MultipartFile> files,
+            @RequestParam(required = false) Integer topK,
             HttpServletRequest request
     ) {
-        return predictionService.quickPredict(files);
+        return predictionService.quickPredict(files, topK);
     }
 
     @GetMapping({"", "/history"})

@@ -62,7 +62,7 @@ public class PredictionService {
     private final ObjectMapper objectMapper;
 
     @Transactional
-    public PredictionBatchResponse predict(UserPrincipal principal, List<MultipartFile> files, String clientIp) {
+    public PredictionBatchResponse predict(UserPrincipal principal, List<MultipartFile> files, String clientIp, Integer topK) {
         log.info("[FLOW][PREDICT] Start authenticated predict userId={} files={} clientIp={}",
                 principal.userId(),
                 files == null ? 0 : files.size(),
@@ -77,7 +77,7 @@ public class PredictionService {
 
         List<ImageUpload> uploads = saveUploads(user, files);
 
-        Object fastApiRaw = callFastApi(files, null);
+        Object fastApiRaw = callFastApi(files, topK);
         List<Map<String, Object>> predictions = normalizeFastApiResponse(fastApiRaw, uploads.size());
 
         List<PredictionItemResponse> resultItems = new ArrayList<>();
@@ -99,7 +99,7 @@ public class PredictionService {
                     "unknown"
             ));
             prediction.setProbability(extractProbability(p));
-            prediction.setTopKJson(writeJson(p.get("top_k")));
+            prediction.setTopKJson(extractTopKJson(p));
             prediction.setRawResponseJson(writeJson(p));
 
             prediction = predictionRepository.save(prediction);
@@ -110,13 +110,13 @@ public class PredictionService {
         return new PredictionBatchResponse(resultItems);
     }
 
-    public PredictionBatchResponse quickPredict(List<MultipartFile> files) {
+    public PredictionBatchResponse quickPredict(List<MultipartFile> files, Integer topK) {
         log.info("[FLOW][PREDICT] Start quick predict files={}", files == null ? 0 : files.size());
         if (files == null || files.isEmpty()) {
             throw new BadRequestException("FILES_REQUIRED", "files is required");
         }
 
-        Object fastApiRaw = callFastApi(files, null);
+        Object fastApiRaw = callFastApi(files, topK);
         List<Map<String, Object>> predictions = normalizeFastApiResponse(fastApiRaw, files.size());
 
         List<PredictionItemResponse> resultItems = new ArrayList<>();
@@ -132,7 +132,7 @@ public class PredictionService {
                             "unknown"
                     ),
                     extractProbability(p),
-                    writeJson(p.get("top_k")),
+                    extractTopKJson(p),
                     writeJson(p),
                     asText(p.get("model_name")),
                     asText(p.get("model_version")),
@@ -190,7 +190,7 @@ public class PredictionService {
     @SuppressWarnings("unchecked")
     private Object callFastApi(List<MultipartFile> files, Integer topK) {
         int resolvedTopK = topK == null ? fastApiProperties.defaultTopK() : topK;
-        String url = "%s/v1/predict?top_k=%d".formatted(fastApiProperties.baseUrl(), resolvedTopK);
+        String url = "%s/v1/predict?top_k=%d".formatted(resolveFastApiBaseUrl(), resolvedTopK);
         log.info("[FLOW][PREDICT] Call FastAPI url={} files={} topK={}", url, files.size(), resolvedTopK);
 
         HttpHeaders headers = new HttpHeaders();
@@ -220,6 +220,17 @@ public class PredictionService {
             log.error("[FLOW][PREDICT] FastAPI call failed: {}", ex.getMessage());
             throw new ExternalServiceException("FASTAPI_CALL_FAILED", "Cannot call prediction service");
         }
+    }
+
+    private String resolveFastApiBaseUrl() {
+        String configured = fastApiProperties.baseUrl();
+        if (configured == null || configured.isBlank()) {
+            throw new ExternalServiceException("FASTAPI_BASE_URL_MISSING", "Prediction service URL is not configured");
+        }
+        if (configured.startsWith("http://") || configured.startsWith("https://")) {
+            return configured;
+        }
+        return "http://" + configured;
     }
 
     @SuppressWarnings("unchecked")
@@ -338,5 +349,13 @@ public class PredictionService {
         } catch (JsonProcessingException e) {
             return String.valueOf(value);
         }
+    }
+
+    private String extractTopKJson(Map<String, Object> payload) {
+        Object topK = payload.get("top_k");
+        if (topK == null) {
+            topK = payload.get("topk");
+        }
+        return writeJson(topK);
     }
 }

@@ -87,6 +87,31 @@ pre {
   overflow: auto;
   min-height: 120px;
 }
+.resultTopK {
+  display: grid;
+  gap: 10px;
+}
+.resultTopKItem {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.92);
+}
+.resultRank {
+  color: #7dd3fc;
+  font-weight: 700;
+}
+.resultLabel {
+  font-weight: 600;
+}
+.resultConfidence {
+  color: #86efac;
+  font-variant-numeric: tabular-nums;
+}
 .adminLayout {
   display: grid;
   gap: 16px;

@@ -6,7 +6,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
-@EnableConfigurationProperties({JwtProperties.class, FastApiProperties.class, UploadProperties.class, AdminProperties.class})
+@EnableConfigurationProperties({
+        JwtProperties.class,
+        FastApiProperties.class,
+        UploadProperties.class,
+        AdminProperties.class,
+        CorsProperties.class,
+        FrontendProperties.class
+})
 public class AppConfig {
     @Bean
     public RestTemplate restTemplate() {

@@ -31,6 +31,7 @@ const meInfo = document.getElementById("meInfo");
 const latestResult = document.getElementById("latestResult");
 const historyList = document.getElementById("historyList");
 const predictionIdInput = document.getElementById("predictionId");
+const topKInput = document.getElementById("topKInput");
 const errorBanner = document.getElementById("errorBanner");
 const googleBtnContainer = document.getElementById("googleBtnContainer");
 const historyPanel = document.getElementById("historyPanel");
@@ -119,9 +120,47 @@ function enableGuestMode() {
   setView("mainView");
 }
 
+function parseTopK(item) {
+  if (Array.isArray(item?.topk)) {
+    return item.topk;
+  }
+  if (!item?.topKJson) {
+    return [];
+  }
+  try {
+    const parsed = JSON.parse(item.topKJson);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (_) {
+    return [];
+  }
+}
+
+function formatConfidence(value) {
+  const numeric = Number(value);
+  if (Number.isNaN(numeric)) return "0.00%";
+  return `${(numeric * 100).toFixed(2)}%`;
+}
+
 function renderDiseaseResult(item) {
-  const disease = item?.predictedClass || "unknown";
-  latestResult.textContent = disease;
+  const topk = parseTopK(item);
+  if (!topk.length) {
+    const disease = item?.predictedClass || "unknown";
+    const confidence = item?.probability != null ? `\nConfidence: ${formatConfidence(item.probability)}` : "";
+    latestResult.textContent = `${disease}${confidence}`;
+    return;
+  }
+
+  latestResult.innerHTML = `
+    <div class="resultTopK">
+      ${topk.map((entry, index) => `
+        <div class="resultTopKItem">
+          <span class="resultRank">#${index + 1}</span>
+          <span class="resultLabel">${entry.label || "unknown"}</span>
+          <span class="resultConfidence">${formatConfidence(entry.confidence)}</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
 }
 
 function formatDateTime(value) {
@@ -568,7 +607,7 @@ async function loadHistory() {
 
   items.forEach(item => {
     const li = document.createElement("li");
-    li.innerHTML = `<strong>${item.predictedClass}</strong> (${item.probability})<br/><small>${item.requestedAt}</small>`;
+    li.innerHTML = `<strong>${item.predictedClass}</strong> (${formatConfidence(item.probability)})<br/><small>${item.requestedAt}</small>`;
     li.onclick = () => {
       clearError();
       renderDiseaseResult(item);
@@ -650,10 +689,11 @@ document.getElementById("predictForm").addEventListener("submit", async (e) => {
 
   const formData = new FormData();
   Array.from(files).forEach(file => formData.append("files", file));
+  const topK = Number(topKInput.value || 3);
 
   try {
     const endpoint = state.guestMode ? "/api/predictions/quick-check" : "/api/predictions";
-    const data = await apiFetch(endpoint, {
+    const data = await apiFetch(`${endpoint}?topK=${encodeURIComponent(topK)}`, {
       method: "POST",
       body: formData
     }, !state.guestMode);

@@ -18,7 +18,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "ImageUpload", schema = "dbo")
+@Table(name = "ImageUpload")
 public class ImageUpload {
 
     @Id
@@ -34,7 +34,7 @@ public class ImageUpload {
     @Column(name = "FileUri", nullable = false, length = 500)
     private String fileUri;
 
-    @Column(name = "FileHashSha256", columnDefinition = "CHAR(64)")
+    @Column(name = "FileHashSha256", length = 64)
     private String fileHashSha256;
 
     @Column(name = "FileSizeBytes")

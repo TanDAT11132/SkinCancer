@@ -2,13 +2,17 @@ D:\vscode\Backend\src\main\java\com\skincancer\backend\BackendApplication.java
 D:\vscode\Backend\src\main\java\com\skincancer\backend\config\AdminProperties.java
 D:\vscode\Backend\src\main\java\com\skincancer\backend\config\AppConfig.java
 D:\vscode\Backend\src\main\java\com\skincancer\backend\config\CorsConfig.java
+D:\vscode\Backend\src\main\java\com\skincancer\backend\config\CorsProperties.java
 D:\vscode\Backend\src\main\java\com\skincancer\backend\config\FastApiProperties.java
+D:\vscode\Backend\src\main\java\com\skincancer\backend\config\FrontendProperties.java
 D:\vscode\Backend\src\main\java\com\skincancer\backend\config\JwtProperties.java
 D:\vscode\Backend\src\main\java\com\skincancer\backend\config\SecurityConfig.java
 D:\vscode\Backend\src\main\java\com\skincancer\backend\config\UploadProperties.java
 D:\vscode\Backend\src\main\java\com\skincancer\backend\controller\AdminController.java
 D:\vscode\Backend\src\main\java\com\skincancer\backend\controller\AuthController.java
 D:\vscode\Backend\src\main\java\com\skincancer\backend\controller\FeedbackController.java
+D:\vscode\Backend\src\main\java\com\skincancer\backend\controller\FrontendConfigController.java
+D:\vscode\Backend\src\main\java\com\skincancer\backend\controller\HealthController.java
 D:\vscode\Backend\src\main\java\com\skincancer\backend\controller\PredictionController.java
 D:\vscode\Backend\src\main\java\com\skincancer\backend\controller\UserController.java
 D:\vscode\Backend\src\main\java\com\skincancer\backend\dto\request\AdminFeedbackUpdateRequest.java

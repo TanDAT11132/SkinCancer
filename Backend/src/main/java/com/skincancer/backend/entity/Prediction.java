@@ -19,7 +19,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "Prediction", schema = "dbo")
+@Table(name = "Prediction")
 public class Prediction {
 
     @Id
@@ -53,10 +53,10 @@ public class Prediction {
     @Column(name = "Probability", nullable = false, precision = 6, scale = 5)
     private BigDecimal probability;
 
-    @Column(name = "TopKJson", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "TopKJson", columnDefinition = "TEXT")
     private String topKJson;
 
-    @Column(name = "RawResponseJson", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "RawResponseJson", columnDefinition = "TEXT")
     private String rawResponseJson;
 }
 

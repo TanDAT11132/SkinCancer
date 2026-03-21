@@ -1,0 +1,43 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: skincancer
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  modelservice:
+    build:
+      context: ./ModelService
+    environment:
+      PORT: 8000
+      DEVICE: cpu
+    ports:
+      - "8000:8000"
+
+  backend:
+    build:
+      context: ./Backend
+    environment:
+      PORT: 8001
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/skincancer
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      APP_JWT_SECRET: replace-with-a-long-random-secret-at-least-32-chars
+      APP_FASTAPI_BASE_URL: http://modelservice:8000
+      APP_FASTAPI_DEFAULT_TOP_K: 3
+      APP_UPLOAD_ROOT_DIR: /tmp/uploads
+      APP_ADMIN_EMAIL: admin@example.com
+      APP_GOOGLE_CLIENT_ID: 437621014579-a1rfrj9408rc0sstl3675s1rk8k139no.apps.googleusercontent.com
+    ports:
+      - "8001:8001"
+    depends_on:
+      - postgres
+      - modelservice
+
+volumes:
+  postgres_data:
