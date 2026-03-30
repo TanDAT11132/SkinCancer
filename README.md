@@ -1,8 +1,8 @@
 "# SkinCancer" 
 step1:run fastAPI service
-https://skincancer-model.onrendservic
+https://skincancer-model.onrender.com/health
 step2: run web service
-url web:https://skincancer-backend-sst7.onrender.com
+web:https://skincancer-backend-sst7.onrender.com
 Project phân loại ung thư da, bộ **HAM10000** với 7 lớp:
 `akiec, bcc, bkl, df, mel, nv, vasc`.
 Mục tiêu chính: đạt hiệu quả tốt trong bối cảnh **mất cân bằng lớp mạnh** (đặc biệt lớp `nv` rất nhiều) và giảm overfitting trên dataset y tế tương đối nhỏ.
